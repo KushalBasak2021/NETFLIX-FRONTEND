@@ -4,10 +4,12 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { AuthContext } from "../../authContext/AuthContext";
+import { logout } from "../../authContext/AuthAction";
 
 const Featured = ({ type, setGenre }) => {
   const [content, setContent] = useState({});
   const { user } = useContext(AuthContext);
+  const { dispatch } = useContext(AuthContext);
 
   useEffect(() => {
     const getRandomContent = async () => {
@@ -22,11 +24,14 @@ const Featured = ({ type, setGenre }) => {
         );
         setContent(res.data[0]);
       } catch (err) {
-        console.log(err);
+        if (err.response.status === 403) {
+          dispatch(logout());
+          window.location.replace("/");
+        }
       }
     };
     getRandomContent();
-  }, [type, user]);
+  }, [type, user, dispatch]);
   return (
     <div className="featured">
       {type && (

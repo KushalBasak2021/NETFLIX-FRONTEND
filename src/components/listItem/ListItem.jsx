@@ -3,13 +3,16 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import AddIcon from "@mui/icons-material/Add";
 import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
 import ThumbDownOffAltOutlinedIcon from "@mui/icons-material/ThumbDownOffAltOutlined";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { logout } from "../../authContext/AuthAction";
+import { AuthContext } from "../../authContext/AuthContext";
 
 export default function ListItem({ index, item }) {
   const [isHovered, setIsHovered] = useState(false);
   const [movieData, setMovieData] = useState({});
+  const { dispatch } = useContext(AuthContext);
   useEffect(() => {
     const getMovieInfo = async () => {
       try {
@@ -25,11 +28,14 @@ export default function ListItem({ index, item }) {
         );
         setMovieData(res.data);
       } catch (err) {
-        console.log(err);
+        if (err.response.status === 403) {
+          dispatch(logout());
+          window.location.replace("/");
+        }
       }
     };
     getMovieInfo();
-  }, [item]);
+  }, [item, dispatch]);
   return (
     <Link to="/watch" state={{ movieData: movieData }}>
       <div
