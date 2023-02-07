@@ -7,12 +7,14 @@ import "./home.scss";
 
 import axios from "axios";
 import { AuthContext } from "../../authContext/AuthContext";
+import { logout } from "../../authContext/AuthAction";
 
 const Home = ({ type }) => {
   let [loading, setLoading] = useState(true);
   const [lists, setLists] = useState([]);
   const [genre, setGenre] = useState(null);
   const { user } = useContext(AuthContext);
+  const { dispatch } = useContext(AuthContext);
 
   useEffect(() => {
     const getRandomLists = async () => {
@@ -30,11 +32,14 @@ const Home = ({ type }) => {
         setLoading(false);
         setLists(res.data);
       } catch (err) {
-        console.log(err);
+        if (err.response.status === 403) {
+          dispatch(logout());
+          window.location.replace("/");
+        }
       }
     };
     getRandomLists();
-  }, [type, genre, user]);
+  }, [type, genre, user, dispatch]);
 
   console.log(user);
   return (
